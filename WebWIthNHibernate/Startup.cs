@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using NHibernate.Tool.hbm2ddl;
 using System.Linq;
 
 namespace WebWIthNHibernate
@@ -26,17 +27,24 @@ namespace WebWIthNHibernate
             services.AddOData();
 
             var connStr = Configuration.GetConnectionString("DefaultConnection");
-            var dbConfiguration = Fluently.Configure()
-                                      .Database(MsSqlConfiguration.MsSql2012.ConnectionString(connStr))
-                                      .Mappings(m => m.FluentMappings.AddFromAssembly(GetType().Assembly));
-            var _sessionFactory = dbConfiguration
+            var sessionFactory = Fluently.Configure()
+                                      .Database(MsSqlConfiguration.MsSql2012.ConnectionString(connStr).ShowSql())
+                                      .Mappings(m => m.FluentMappings.AddFromAssembly(GetType().Assembly))
+                                     //if you need to create database uncomment line below run once then comment again, because it will replace your table when it runs
+                                      .ExposeConfiguration(cfg => new SchemaExport(cfg).Create(true, true))
                                       .BuildSessionFactory();
-
-            //if you need to create database uncomment those lines run once then comment again, because it will replace your table when it runs
-            //var exporter = new SchemaExport(dbConfiguration.BuildConfiguration());
-            //exporter.Execute(true, true, false);
-
-            services.AddScoped(factory => _sessionFactory.OpenSession());
+            services.AddScoped(factory =>
+            {
+#if (DEBUG)
+                var interceptor = new SqlDebugOutputInterceptor();
+                var session = sessionFactory.WithOptions()
+                                            .Interceptor(interceptor)
+                                            .OpenSession();
+#else
+    return sessionFactory.OpenSession();
+#endif
+                return session;
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
