@@ -32,7 +32,7 @@ endpoints.MaxTop(30).Filter().Count().Select().OrderBy();
 
 After that I've created a custom version of `EnableQueryAttribute` that I called [EnableQueryCustomAttribute](https://github.com/AlbertoMonteiro/AspNetCoreWithNHibernateAndOData/blob/master/WebWIthNHibernate/Models/EnableQueryCustom.cs#L12-L33) to allow change data structure when `$count=true` is sent in query string, so I can return items with the total count of items in database based on query filters.
 
-So I added this attribute to my action [PessoasController.cs#L23](https://github.com/AlbertoMonteiro/AspNetCoreWithNHibernateAndOData/blob/master/WebWIthNHibernate/Controllers/PessoasController.cs#L23).
+So I added this attribute to my action [PessoasController.cs#L17](https://github.com/AlbertoMonteiro/AspNetCoreWithNHibernateAndOData/blob/master/WebWIthNHibernate/Controllers/PessoasController.cs#L17).
 
 Then I'just had to configure NHibernate session that I did in [Startup.cs#L28-L39](https://github.com/AlbertoMonteiro/AspNetCoreWithNHibernateAndOData/blob/master/WebWIthNHibernate/Startup.cs#L28-L39)
 
